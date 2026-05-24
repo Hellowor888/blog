@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, enableNetwork } from 'firebase/firestore'
+import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, getDocs } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
 interface Message {
@@ -25,20 +25,9 @@ export default function Guestbook() {
   const [authed, setAuthed] = useState(false)
   const [pwd, setPwd] = useState('')
   const [pwdError, setPwdError] = useState(false)
-  const [firestoreReady, setFirestoreReady] = useState(false)
   const pwdRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    enableNetwork(db).then(() => {
-      setFirestoreReady(true)
-    }).catch(() => {
-      // enableNetwork might fail if already online, ignore
-      setFirestoreReady(true)
-    })
-  }, [])
-
-  useEffect(() => {
-    if (!firestoreReady) return
     const q = query(collection(db, 'guestbook_messages'), orderBy('createdAt', 'desc'))
     const unsub = onSnapshot(q,
       (snapshot) => {
@@ -48,30 +37,37 @@ export default function Guestbook() {
       },
       (err) => {
         console.error('Firestore 监听失败:', err)
+        alert('留言加载失败: ' + err.message)
         setLoading(false)
       }
     )
     return unsub
-  }, [firestoreReady])
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim() || !text.trim()) return
 
     try {
-      await addDoc(collection(db, 'guestbook_messages'), {
+      const docRef = await addDoc(collection(db, 'guestbook_messages'), {
         name: name.trim(),
         text: text.trim(),
         time: new Date().toLocaleString('zh-CN'),
         createdAt: serverTimestamp(),
       })
+      console.log('留言已写入 Firestore, ID:', docRef.id)
+
+      // 立即查询验证数据是否已写入
+      const snap = await getDocs(query(collection(db, 'guestbook_messages'), orderBy('createdAt', 'desc')))
+      console.log('当前 Firestore 留言总数:', snap.size, '条')
+
       setName('')
       setText('')
       setSubmitted(true)
       setTimeout(() => setSubmitted(false), 2000)
-    } catch (err) {
+    } catch (err: any) {
       console.error('留言提交失败:', err)
-      alert('留言提交失败，请检查网络后重试')
+      alert('留言提交失败: ' + (err.message || '未知错误'))
     }
   }
 
