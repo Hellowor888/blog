@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 export default function About() {
   return (
     <div className="prose dark:prose-invert max-w-none">
-      <h1 className="gradient-text">关于我</h1>
+      <h1 className="gradient-text text-2xl md:text-3xl">关于我</h1>
 
       <p>
         你好！欢迎来到我的个人博客。

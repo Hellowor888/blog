@@ -9,9 +9,9 @@ interface PostCardProps {
 
 export default function PostCard({ post, selectedTags, onTagClick }: PostCardProps) {
   return (
-    <article className="glass-card glass-card-hover p-6 rounded-2xl">
+    <article className="glass-card glass-card-hover p-4 md:p-6 rounded-2xl">
       <Link to={`/post/${post.slug}`} className="block group">
-        <h2 className="text-xl font-semibold mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+        <h2 className="text-lg md:text-xl font-semibold mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
           {post.title}
         </h2>
       </Link>

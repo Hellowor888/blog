@@ -24,7 +24,7 @@ export default function Collection() {
       </Link>
 
       <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 gradient-text">{collection.name}</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-2 gradient-text">{collection.name}</h1>
         <p className="text-gray-500 dark:text-gray-400">{collection.description}</p>
         <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
           {collection.photos.length} 张照片

@@ -33,7 +33,7 @@ export default function Post() {
         <Link to="/" className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block">
           &larr; 返回首页
         </Link>
-        <h1 className="text-3xl font-bold mt-2 mb-3 gradient-text">{post.title}</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mt-2 mb-3 gradient-text">{post.title}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{post.date}</p>
         <div className="flex flex-wrap gap-2">
           {post.tags.map((tag) => (

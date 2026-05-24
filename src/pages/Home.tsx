@@ -32,8 +32,8 @@ export default function Home() {
     <div>
       {/* 摄影作品 */}
       {collections.length > 0 && (
-        <section className="mb-12">
-          <h1 className="text-2xl font-bold mb-6 gradient-text">摄影作品</h1>
+        <section className="mb-8 md:mb-12">
+          <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 gradient-text">摄影作品</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {collections.map((col) => (
               <Link
@@ -51,8 +51,8 @@ export default function Home() {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <h3 className="text-xl font-bold text-white mb-1">{col.name}</h3>
-                  <p className="text-sm text-white/80 line-clamp-1">{col.description}</p>
+                  <h3 className="text-lg md:text-xl font-bold text-white mb-1">{col.name}</h3>
+                  <p className="text-xs md:text-sm text-white/80 line-clamp-1">{col.description}</p>
                   <p className="text-xs text-white/60 mt-2">{col.photos.length} 张照片</p>
                 </div>
               </Link>
@@ -63,7 +63,7 @@ export default function Home() {
 
       {/* 最新文章 */}
       <section>
-        <h2 className="text-2xl font-bold mb-6 gradient-text">最新文章</h2>
+        <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 gradient-text">最新文章</h2>
 
         <TagFilter tags={tags} selectedTags={selectedTags} onTagClick={handleTagClick} />
 

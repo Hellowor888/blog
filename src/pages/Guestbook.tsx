@@ -81,10 +81,10 @@ export default function Guestbook() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">给我留言</h1>
+      <h1 className="text-xl md:text-2xl font-bold mb-6 gradient-text">给我留言</h1>
 
       {/* 留言表单——所有人可见 */}
-      <form onSubmit={handleSubmit} className="mb-8 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur">
+      <form onSubmit={handleSubmit} className="mb-8 p-4 md:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur">
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">
             你的名字

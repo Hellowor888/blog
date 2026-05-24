@@ -11,7 +11,7 @@ export default function Layout({ dark, onToggleDark }: LayoutProps) {
   return (
     <div className="min-h-screen relative">
       <Header darkToggle={<DarkToggle dark={dark} onToggle={onToggleDark} />} />
-      <main className="max-w-4xl mx-auto px-4 py-10">
+      <main className="max-w-4xl mx-auto px-4 py-6 md:py-10">
         <div className="animate-fade-in-up">
           <Outlet />
         </div>
