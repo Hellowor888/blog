@@ -1,62 +1,52 @@
 import { useState, useEffect, useRef } from 'react'
+import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore'
+import { db } from '../config/firebase'
 
 interface Message {
-  id: number
+  id: string
   name: string
   text: string
   time: string
 }
 
-// 管理员密码的 SHA-256 哈希（代码中不存储明文密码）
-// 修改密码：将新密码的 SHA-256 哈希替换下面的值即可
-// 在线计算哈希：https://emn178.github.io/online-tools/sha256.html
 const ADMIN_PASSWORD_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
 
 async function sha256(message: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(message))
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
 }
-const STORAGE_KEY = 'blog-guestbook-messages'
-
-function loadMessages(): Message[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
-}
-
-function saveMessages(msgs: Message[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs))
-}
 
 export default function Guestbook() {
-  const [messages, setMessages] = useState<Message[]>(loadMessages)
+  const [messages, setMessages] = useState<Message[]>([])
   const [name, setName] = useState('')
   const [text, setText] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [authed, setAuthed] = useState(false)
   const [pwd, setPwd] = useState('')
   const [pwdError, setPwdError] = useState(false)
   const pwdRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    saveMessages(messages)
-  }, [messages])
+    const q = query(collection(db, 'guestbook_messages'), orderBy('createdAt', 'desc'))
+    const unsub = onSnapshot(q, (snapshot) => {
+      setMessages(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Message)))
+      setLoading(false)
+    })
+    return unsub
+  }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim() || !text.trim()) return
 
-    const newMsg: Message = {
-      id: Date.now(),
+    await addDoc(collection(db, 'guestbook_messages'), {
       name: name.trim(),
       text: text.trim(),
       time: new Date().toLocaleString('zh-CN'),
-    }
+      createdAt: serverTimestamp(),
+    })
 
-    setMessages((prev) => [newMsg, ...prev])
     setName('')
     setText('')
     setSubmitted(true)
@@ -74,16 +64,15 @@ export default function Guestbook() {
     }
   }
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!authed) return
-    setMessages((prev) => prev.filter((m) => m.id !== id))
+    await deleteDoc(doc(db, 'guestbook_messages', id))
   }
 
   return (
     <div>
       <h1 className="text-xl md:text-2xl font-bold mb-6 gradient-text">给我留言</h1>
 
-      {/* 留言表单——所有人可见 */}
       <form onSubmit={handleSubmit} className="mb-8 p-4 md:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur">
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">
@@ -125,7 +114,6 @@ export default function Guestbook() {
         )}
       </form>
 
-      {/* 管理员查看区域 */}
       {!authed ? (
         <div className="p-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur text-center">
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
@@ -166,23 +154,18 @@ export default function Guestbook() {
             </button>
           </div>
 
-          {messages.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-12">
-              暂无留言
-            </p>
+          {loading ? (
+            <p className="text-gray-500 dark:text-gray-400 text-center py-12">加载中...</p>
+          ) : messages.length === 0 ? (
+            <p className="text-gray-500 dark:text-gray-400 text-center py-12">暂无留言</p>
           ) : (
             <div className="grid gap-4">
               {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur"
-                >
+                <div key={msg.id} className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <span className="font-medium text-sm">{msg.name}</span>
-                      <span className="text-xs text-gray-400 dark:text-gray-500 ml-3">
-                        {msg.time}
-                      </span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500 ml-3">{msg.time}</span>
                     </div>
                     <button
                       onClick={() => handleDelete(msg.id)}
