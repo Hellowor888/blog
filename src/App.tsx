@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { useDarkMode } from './hooks/useDarkMode'
 import Layout from './components/Layout'
 import Home from './pages/Home'
@@ -11,7 +11,7 @@ export default function App() {
   const [dark, toggleDark] = useDarkMode()
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route element={<Layout dark={dark} onToggleDark={toggleDark} />}>
           <Route path="/" element={<Home />} />
@@ -21,6 +21,6 @@ export default function App() {
           <Route path="/guestbook" element={<Guestbook />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
