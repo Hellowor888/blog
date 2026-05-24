@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, getDocs } from 'firebase/firestore'
+import { collection, query, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, getDocs, Timestamp } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
 interface Message {
@@ -7,6 +7,7 @@ interface Message {
   name: string
   text: string
   time: string
+  createdAt?: Timestamp
 }
 
 const ADMIN_PASSWORD_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
@@ -28,10 +29,16 @@ export default function Guestbook() {
   const pwdRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    const q = query(collection(db, 'guestbook_messages'), orderBy('createdAt', 'desc'))
+    const q = query(collection(db, 'guestbook_messages'))
     const unsub = onSnapshot(q,
       (snapshot) => {
         const msgs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Message))
+        msgs.sort((a, b) => {
+          const ta = a.createdAt?.toMillis?.() ?? 0
+          const tb = b.createdAt?.toMillis?.() ?? 0
+          return tb - ta
+        })
+        console.log('Firestore 监听返回:', msgs.length, '条留言')
         setMessages(msgs)
         setLoading(false)
       },
@@ -58,7 +65,7 @@ export default function Guestbook() {
       console.log('留言已写入 Firestore, ID:', docRef.id)
 
       // 立即查询验证数据是否已写入
-      const snap = await getDocs(query(collection(db, 'guestbook_messages'), orderBy('createdAt', 'desc')))
+      const snap = await getDocs(query(collection(db, 'guestbook_messages')))
       console.log('当前 Firestore 留言总数:', snap.size, '条')
 
       setName('')
