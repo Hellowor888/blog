@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, enableNetwork } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
 interface Message {
@@ -25,32 +25,54 @@ export default function Guestbook() {
   const [authed, setAuthed] = useState(false)
   const [pwd, setPwd] = useState('')
   const [pwdError, setPwdError] = useState(false)
+  const [firestoreReady, setFirestoreReady] = useState(false)
   const pwdRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    const q = query(collection(db, 'guestbook_messages'), orderBy('createdAt', 'desc'))
-    const unsub = onSnapshot(q, (snapshot) => {
-      setMessages(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Message)))
-      setLoading(false)
+    enableNetwork(db).then(() => {
+      setFirestoreReady(true)
+    }).catch(() => {
+      // enableNetwork might fail if already online, ignore
+      setFirestoreReady(true)
     })
-    return unsub
   }, [])
+
+  useEffect(() => {
+    if (!firestoreReady) return
+    const q = query(collection(db, 'guestbook_messages'), orderBy('createdAt', 'desc'))
+    const unsub = onSnapshot(q,
+      (snapshot) => {
+        const msgs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Message))
+        setMessages(msgs)
+        setLoading(false)
+      },
+      (err) => {
+        console.error('Firestore 监听失败:', err)
+        setLoading(false)
+      }
+    )
+    return unsub
+  }, [firestoreReady])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim() || !text.trim()) return
 
-    await addDoc(collection(db, 'guestbook_messages'), {
-      name: name.trim(),
-      text: text.trim(),
-      time: new Date().toLocaleString('zh-CN'),
-      createdAt: serverTimestamp(),
-    })
-
-    setName('')
-    setText('')
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 2000)
+    try {
+      await addDoc(collection(db, 'guestbook_messages'), {
+        name: name.trim(),
+        text: text.trim(),
+        time: new Date().toLocaleString('zh-CN'),
+        createdAt: serverTimestamp(),
+      })
+      setName('')
+      setText('')
+      setSubmitted(true)
+      setTimeout(() => setSubmitted(false), 2000)
+    } catch (err) {
+      console.error('留言提交失败:', err)
+      alert('留言提交失败，请检查网络后重试')
+    }
   }
 
   const handleAuth = async () => {
