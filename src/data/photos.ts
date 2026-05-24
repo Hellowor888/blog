@@ -6,18 +6,20 @@ export interface PhotoCollection {
   photos: string[]
 }
 
+const BASE = import.meta.env.BASE_URL
+
 const collections: PhotoCollection[] = [
   {
     id: 'luoyang',
     name: '洛阳',
     description: '千年古都，牡丹花城。漫步龙门石窟，感受盛唐遗风。',
-    cover: '/photos/照片1.jpg',
+    cover: `${BASE}photos/照片1.jpg`,
     photos: [
-      '/photos/照片1.jpg',
-      '/photos/照片2.jpg',
-      '/photos/照片3.jpg',
-      '/photos/照片4.jpg',
-      '/photos/照片5.jpg',
+      `${BASE}photos/照片1.jpg`,
+      `${BASE}photos/照片2.jpg`,
+      `${BASE}photos/照片3.jpg`,
+      `${BASE}photos/照片4.jpg`,
+      `${BASE}photos/照片5.jpg`,
     ],
   },
 ]
