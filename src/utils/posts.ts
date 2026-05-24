@@ -1,4 +1,3 @@
-import matter from 'gray-matter'
 import type { Post } from '../types'
 
 const modules = import.meta.glob('../content/posts/*.md', {
@@ -6,20 +5,44 @@ const modules = import.meta.glob('../content/posts/*.md', {
   import: 'default',
 })
 
+function parseFrontmatter(raw: string): { data: Record<string, unknown>; content: string } {
+  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
+  if (!match) return { data: {}, content: raw }
+
+  const frontmatterStr = match[1]
+  const content = match[2]
+  const data: Record<string, unknown> = {}
+
+  for (const line of frontmatterStr.split('\n')) {
+    const idx = line.indexOf(':')
+    if (idx === -1) continue
+    const key = line.slice(0, idx).trim()
+    let value: unknown = line.slice(idx + 1).trim()
+
+    if (typeof value === 'string' && value.startsWith('[') && value.endsWith(']')) {
+      value = value.slice(1, -1).split(',').map((s: string) => s.trim())
+    }
+
+    data[key] = value
+  }
+
+  return { data, content }
+}
+
 export async function getAllPosts(): Promise<Post[]> {
   const posts: Post[] = []
 
   for (const [path, loader] of Object.entries(modules)) {
     const raw = (await loader()) as string
-    const { data, content } = matter(raw)
+    const { data, content } = parseFrontmatter(raw)
     const slug = path.replace('../content/posts/', '').replace('.md', '')
 
     posts.push({
       slug,
-      title: data.title ?? slug,
-      date: data.date ?? '',
-      tags: data.tags ?? [],
-      excerpt: data.excerpt ?? '',
+      title: (data.title as string) ?? slug,
+      date: (data.date as string) ?? '',
+      tags: (data.tags as string[]) ?? [],
+      excerpt: (data.excerpt as string) ?? '',
       content,
     })
   }
