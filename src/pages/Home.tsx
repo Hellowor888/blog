@@ -41,7 +41,7 @@ export default function Home() {
                 to={`/collection/${col.id}`}
                 className="group relative block overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800 hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
               >
-                <div className="aspect-[4/3] overflow-hidden">
+                <div className="aspect-[16/10] md:aspect-[4/3] overflow-hidden">
                   <img
                     src={col.cover}
                     alt={col.name}
@@ -50,7 +50,7 @@ export default function Home() {
                   />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
                   <h3 className="text-lg md:text-xl font-bold text-white mb-1">{col.name}</h3>
                   <p className="text-xs md:text-sm text-white/80 line-clamp-1">{col.description}</p>
                   <p className="text-xs text-white/60 mt-2">{col.photos.length} 张照片</p>
