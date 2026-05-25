@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { getItemById } from '../data/bookshelf'
+import BookReviews from '../components/BookReviews'
 
 export default function BookshelfDetail() {
   const { id } = useParams<{ id: string }>()
@@ -65,6 +66,8 @@ export default function BookshelfDetail() {
             </Link>
           ))}
         </div>
+
+        <BookReviews itemId={item.id} />
       </div>
     )
   }
@@ -97,6 +100,8 @@ export default function BookshelfDetail() {
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">内容稍后更新，敬请期待</p>
         </div>
       )}
+
+      <BookReviews itemId={item.id} />
     </div>
   )
 }
