@@ -6,7 +6,7 @@ interface HeaderProps {
   onSearch: () => void
 }
 
-export default function Header({ darkToggle }: HeaderProps) {
+export default function Header({ darkToggle, onSearch }: HeaderProps) {
   const { pathname } = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
 
