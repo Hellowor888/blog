@@ -5,48 +5,44 @@ import type { BookshelfItem } from '../data/bookshelf'
 
 function SeriesStack({ item }: { item: BookshelfItem }) {
   const kids = item.children!.slice(0, 3)
-  // Offsets for diagonal cascade toward upper-right
-  const offsets = [
-    { x: 0, y: 0, rotate: 'rotate-0', z: 'z-10' },
-    { x: 14, y: -14, rotate: 'rotate-[6deg]', z: 'z-[5]' },
-    { x: 28, y: -28, rotate: 'rotate-[12deg]', z: 'z-0' },
-  ]
 
   return (
-    <div className="relative h-56 w-40 mx-auto">
+    <div className="relative w-36 h-48 mx-auto">
+      {/* Render back to front so earlier covers peek out behind */}
       {kids.map((kid, i) => {
-        const idx = kids.length - 1 - i // render back to front
-        const o = offsets[idx]
+        const n = kids.length
+        const pos = n - 1 - i // 0 = front, 1 = middle, 2 = back
+        const tx = pos * 4   // 0, 4, 8 px right
+        const ty = -(pos * 5) // 0, -5, -10 px up
         return (
           <div
             key={kid.id}
-            className={`absolute inset-0 w-36 h-48 rounded-lg shadow-lg ${o.z}`}
+            className="absolute top-0 left-0 w-36 h-48 rounded-lg overflow-hidden shadow-md"
             style={{
-              transform: `translate(${o.x}px, ${o.y}px)`,
+              transform: `translate(${tx}px, ${ty}px)`,
+              zIndex: 10 - pos,
             }}
           >
-            <div className={`w-36 h-48 rounded-lg overflow-hidden ${o.rotate}`}>
-              {kid.cover ? (
-                <img
-                  src={`/blog/covers/${kid.cover}`}
-                  alt={kid.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                <div className={`w-full h-full bg-gradient-to-br ${kid.color} flex flex-col items-center justify-center p-3 text-center`}>
-                  <span className="text-lg mb-1">{kid.type === 'book' ? '📖' : '🎬'}</span>
-                  <span className="text-white font-bold text-[10px] leading-tight drop-shadow-md whitespace-pre-line">{kid.title}</span>
-                </div>
-              )}
-            </div>
+            {kid.cover ? (
+              <img
+                src={`/blog/covers/${kid.cover}`}
+                alt={kid.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <div className={`w-full h-full bg-gradient-to-br ${kid.color} flex flex-col items-center justify-center p-3 text-center`}>
+                <span className="text-lg mb-1">{kid.type === 'book' ? '📖' : '🎬'}</span>
+                <span className="text-white font-bold text-[10px] leading-tight drop-shadow-md whitespace-pre-line">{kid.title}</span>
+              </div>
+            )}
           </div>
         )
       })}
-      {/* Series label badge */}
-      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-3 py-0.5 rounded-full shadow border border-gray-200 dark:border-gray-700 z-20">
-        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
-          {item.children!.length} 部 · {item.type === 'book' ? '系列' : '系列'}
+      {/* Series name badge */}
+      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-2.5 py-0.5 rounded-full shadow border border-gray-200 dark:border-gray-700 z-20">
+        <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
+          {item.title}
         </span>
       </div>
     </div>
