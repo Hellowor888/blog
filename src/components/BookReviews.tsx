@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Stars from './Stars'
 import { getReviews, addReview, deleteReview } from '../utils/reviews'
 import type { BookshelfReview } from '../utils/reviews'
+import { useIdentity } from '../hooks/useIdentity'
 
 const ADMIN_PASSWORD_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
 
@@ -12,7 +13,7 @@ async function sha256(message: string): Promise<string> {
 
 function avgRating(reviews: BookshelfReview[]): number {
   if (reviews.length === 0) return 0
-  const sum = reviews.reduce((a, r) => a + r.rating, 0)
+  const sum = reviews.reduce((a, r) => a + (r.rating || 0), 0)
   return Math.round((sum / reviews.length) * 10) / 10
 }
 
@@ -21,7 +22,9 @@ export default function BookReviews({ itemId }: { itemId: string }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const [name, setName] = useState('')
+  const { identity, setName: saveIdentity } = useIdentity()
+
+  const [nameInput, setNameInput] = useState('')
   const [rating, setRating] = useState(0)
   const [text, setText] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -48,21 +51,28 @@ export default function BookReviews({ itemId }: { itemId: string }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim() || rating === 0 || !text.trim()) return
+    const nameToUse = identity.locked ? identity.name : nameInput.trim()
+    if (!nameToUse || rating === 0 || !text.trim()) return
 
     try {
       setSubmitting(true)
       setSubmitError('')
+
+      // Save identity on first use
+      if (!identity.locked) {
+        saveIdentity(nameInput.trim())
+      }
+
       await addReview({
         itemId,
-        name: name.trim(),
+        name: nameToUse,
         rating,
         text: text.trim(),
         time: new Date().toLocaleString('zh-CN'),
       })
-      setName('')
       setRating(0)
       setText('')
+      setNameInput('')
       setSubmitted(true)
       setTimeout(() => setSubmitted(false), 2500)
       await load()
@@ -115,14 +125,23 @@ export default function BookReviews({ itemId }: { itemId: string }) {
         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">写下你的评价</p>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="你的昵称"
-            maxLength={30}
-            className="w-full sm:w-48 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-shadow text-sm"
-          />
+          {identity.locked ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500 dark:text-gray-400">昵称：</span>
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg">
+                {identity.name}
+              </span>
+            </div>
+          ) : (
+            <input
+              type="text"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              placeholder="你的昵称（确定后不可修改）"
+              maxLength={30}
+              className="w-full sm:w-56 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-shadow text-sm"
+            />
+          )}
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500 dark:text-gray-400">评分：</span>
             <Stars rating={rating} onRate={setRating} />
@@ -146,7 +165,7 @@ export default function BookReviews({ itemId }: { itemId: string }) {
         <div className="flex items-center gap-3">
           <button
             type="submit"
-            disabled={!name.trim() || rating === 0 || !text.trim() || submitting}
+            disabled={(!identity.locked && !nameInput.trim()) || rating === 0 || !text.trim() || submitting}
             className="px-5 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
           >
             {submitting ? '提交中...' : '提交评价'}
@@ -176,7 +195,7 @@ export default function BookReviews({ itemId }: { itemId: string }) {
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-3">
                   <span className="font-medium text-sm text-gray-900 dark:text-gray-100">{r.name}</span>
-                  <Stars rating={r.rating} readonly size="sm" />
+                  <Stars rating={r.rating || 0} readonly size="sm" />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400 dark:text-gray-500">{r.time}</span>

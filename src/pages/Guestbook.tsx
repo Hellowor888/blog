@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useIdentity } from '../hooks/useIdentity'
 
 interface Message {
   _id: string
@@ -28,7 +29,8 @@ async function api(path: string, options?: RequestInit) {
 
 export default function Guestbook() {
   const [messages, setMessages] = useState<Message[]>([])
-  const [name, setName] = useState('')
+  const { identity, setName: saveIdentity } = useIdentity()
+  const [nameInput, setNameInput] = useState('')
   const [text, setText] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -60,23 +62,28 @@ export default function Guestbook() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim() || !text.trim()) return
+    const nameToUse = identity.locked ? identity.name : nameInput.trim()
+    if (!nameToUse || !text.trim()) return
 
     try {
+      // Save identity on first use
+      if (!identity.locked) {
+        saveIdentity(nameInput.trim())
+      }
+
       await api('', {
         method: 'POST',
         body: JSON.stringify({
-          name: name.trim(),
+          name: nameToUse,
           text: text.trim(),
           time: new Date().toLocaleString('zh-CN'),
         }),
       })
       console.log('留言已提交')
-      setName('')
+      setNameInput('')
       setText('')
       setSubmitted(true)
       setTimeout(() => setSubmitted(false), 2500)
-      // 重新加载留言列表
       await loadMessages()
     } catch (err: any) {
       console.error('留言提交失败:', err)
@@ -124,14 +131,22 @@ export default function Guestbook() {
           <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">
             你的名字
           </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="请输入你的名字"
-            maxLength={30}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-sm"
-          />
+          {identity.locked ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg">
+                {identity.name}
+              </span>
+            </div>
+          ) : (
+            <input
+              type="text"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              placeholder="你的昵称（确定后不可修改）"
+              maxLength={30}
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-sm"
+            />
+          )}
         </div>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">
@@ -149,7 +164,7 @@ export default function Guestbook() {
         <div className="flex items-center gap-3">
           <button
             type="submit"
-            disabled={!name.trim() || !text.trim()}
+            disabled={(!identity.locked && !nameInput.trim()) || !text.trim()}
             className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
           >
             提交留言

@@ -20,7 +20,7 @@ export default function BookshelfDetail() {
 
   const hasChildren = item.children && item.children.length > 0
 
-  // Series collection view
+  // Series collection view — only show children grid, no overview, no reviews
   if (hasChildren) {
     return (
       <div>
@@ -36,15 +36,6 @@ export default function BookshelfDetail() {
           <p className="text-sm text-gray-500 dark:text-gray-400">{item.subtitle}</p>
         </header>
 
-        {/* Series overview — if parent has content, show it */}
-        {item.content && (
-          <div className="prose dark:prose-invert max-w-none mb-10 glass-card rounded-2xl p-6 md:p-8">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {item.content}
-            </ReactMarkdown>
-          </div>
-        )}
-
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           {item.type === 'book' ? '系列书目' : '系列作品'}
         </h2>
@@ -56,23 +47,30 @@ export default function BookshelfDetail() {
               to={`/bookshelf/${child.id}/detail`}
               className="block group"
             >
-              <div className={`w-36 h-48 rounded-lg bg-gradient-to-br ${child.color} shadow-lg group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center p-4 text-center mx-auto`}>
-                <span className="text-2xl mb-2">{child.type === 'book' ? '📖' : '🎬'}</span>
-                <span className="text-white font-bold text-sm leading-tight drop-shadow-md whitespace-pre-line">{child.title}</span>
-              </div>
+              {child.cover ? (
+                <img
+                  src={`/blog/covers/${child.cover}`}
+                  alt={child.title}
+                  className="w-36 h-48 rounded-lg object-cover shadow-lg group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-300 mx-auto"
+                  loading="lazy"
+                />
+              ) : (
+                <div className={`w-36 h-48 rounded-lg bg-gradient-to-br ${child.color} shadow-lg group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center p-4 text-center mx-auto`}>
+                  <span className="text-2xl mb-2">{child.type === 'book' ? '📖' : '🎬'}</span>
+                  <span className="text-white font-bold text-sm leading-tight drop-shadow-md whitespace-pre-line">{child.title}</span>
+                </div>
+              )}
               <div className="text-center mt-3">
                 <p className="text-xs text-gray-500 dark:text-gray-400">{child.subtitle}</p>
               </div>
             </Link>
           ))}
         </div>
-
-        <BookReviews itemId={item.id} />
       </div>
     )
   }
 
-  // Single item detail with markdown content
+  // Single item detail with cover image, markdown content, and reviews
   return (
     <div>
       <Link to="/bookshelf" className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-6 inline-block">
@@ -80,11 +78,22 @@ export default function BookshelfDetail() {
       </Link>
 
       <header className="mb-8">
-        <div className="flex items-center gap-3 mb-1">
-          <span className="text-2xl">{item.type === 'book' ? '📖' : '🎬'}</span>
-          <h1 className="text-2xl md:text-3xl font-bold gradient-text">{item.title}</h1>
+        <div className="flex items-start gap-5">
+          {item.cover && (
+            <img
+              src={`/blog/covers/${item.cover}`}
+              alt={item.title}
+              className="w-28 h-40 rounded-lg object-cover shadow-lg flex-shrink-0"
+            />
+          )}
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <span className="text-2xl">{item.type === 'book' ? '📖' : '🎬'}</span>
+              <h1 className="text-2xl md:text-3xl font-bold gradient-text">{item.title}</h1>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{item.subtitle}</p>
+          </div>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{item.subtitle}</p>
       </header>
 
       {item.content ? (

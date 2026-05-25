@@ -5,6 +5,7 @@ export interface BookshelfItem {
   type: 'book' | 'movie'
   content: string
   color: string
+  cover?: string
   children?: BookshelfItem[]
 }
 
@@ -219,8 +220,8 @@ const books: BookshelfItem[] = [
     color: 'from-amber-700 via-red-800 to-amber-900',
     content: '',
     children: [
-      { id: 'hp-book-1', title: "Harry Potter and the\nPhilosopher's Stone", subtitle: 'J.K. Rowling', type: 'book', color: 'from-amber-600 to-orange-700', content: hp1Review },
-      { id: 'hp-book-2', title: 'Harry Potter and the\nChamber of Secrets', subtitle: 'J.K. Rowling', type: 'book', color: 'from-green-700 to-emerald-800', content: hp2Review },
+      { id: 'hp-book-1', title: "Harry Potter and the\nPhilosopher's Stone", subtitle: 'J.K. Rowling', type: 'book', color: 'from-amber-600 to-orange-700', cover: 'books/hp-book-1.png', content: hp1Review },
+      { id: 'hp-book-2', title: 'Harry Potter and the\nChamber of Secrets', subtitle: 'J.K. Rowling', type: 'book', color: 'from-green-700 to-emerald-800', cover: 'books/hp-book-2.png', content: hp2Review },
     ],
   },
   {
@@ -229,6 +230,7 @@ const books: BookshelfItem[] = [
     subtitle: '曹雪芹',
     type: 'book',
     color: 'from-red-800 via-rose-700 to-red-900',
+    cover: 'books/red-mansions.png',
     content: redMansionsReview,
   },
   {
@@ -239,9 +241,9 @@ const books: BookshelfItem[] = [
     color: 'from-slate-700 via-gray-600 to-slate-800',
     content: '',
     children: [
-      { id: 'dragon1', title: '龙族 I\n火之晨曦', subtitle: '江南', type: 'book', color: 'from-orange-600 to-red-700', content: dragon1Review },
-      { id: 'dragon2', title: '龙族 II\n悼亡者之瞳', subtitle: '江南', type: 'book', color: 'from-blue-700 to-indigo-800', content: dragon2Review },
-      { id: 'dragon3', title: '龙族 III\n黑月之潮', subtitle: '江南', type: 'book', color: 'from-purple-700 to-violet-800', content: dragon3Review },
+      { id: 'dragon1', title: '龙族 I\n火之晨曦', subtitle: '江南', type: 'book', color: 'from-orange-600 to-red-700', cover: 'books/dragon1.png', content: dragon1Review },
+      { id: 'dragon2', title: '龙族 II\n悼亡者之瞳', subtitle: '江南', type: 'book', color: 'from-blue-700 to-indigo-800', cover: 'books/dragon2.png', content: dragon2Review },
+      { id: 'dragon3', title: '龙族 III\n黑月之潮', subtitle: '江南', type: 'book', color: 'from-purple-700 to-violet-800', cover: 'books/dragon3.png', content: dragon3Review },
     ],
   },
   {
@@ -263,13 +265,13 @@ const movies: BookshelfItem[] = [
     color: 'from-indigo-800 via-purple-700 to-indigo-900',
     content: hpMoviesReview,
     children: [
-      { id: 'hp-m1', title: '哈利·波特与\n魔法石', subtitle: 'Chris Columbus', type: 'movie', color: 'from-amber-500 to-yellow-600', content: hpM1Review },
-      { id: 'hp-m2', title: '哈利·波特与\n密室', subtitle: 'Chris Columbus', type: 'movie', color: 'from-green-600 to-emerald-700', content: hpM2Review },
-      { id: 'hp-m3', title: '哈利·波特与\n阿兹卡班的囚徒', subtitle: 'Alfonso Cuarón', type: 'movie', color: 'from-blue-600 to-indigo-700', content: hpM3Review },
-      { id: 'hp-m4', title: '哈利·波特与\n火焰杯', subtitle: 'Mike Newell', type: 'movie', color: 'from-orange-500 to-red-600', content: hpM4Review },
-      { id: 'hp-m5', title: '哈利·波特与\n凤凰社', subtitle: 'David Yates', type: 'movie', color: 'from-blue-500 to-cyan-600', content: hpM5Review },
-      { id: 'hp-m6', title: '哈利·波特与\n混血王子', subtitle: 'David Yates', type: 'movie', color: 'from-emerald-600 to-teal-700', content: hpM6Review },
-      { id: 'hp-m7', title: '哈利·波特与\n死亡圣器', subtitle: 'David Yates', type: 'movie', color: 'from-gray-600 to-slate-700', content: hpM7Review },
+      { id: 'hp-m1', title: '哈利·波特与\n魔法石', subtitle: 'Chris Columbus', type: 'movie', color: 'from-amber-500 to-yellow-600', cover: 'movies/hp-m1.png', content: hpM1Review },
+      { id: 'hp-m2', title: '哈利·波特与\n密室', subtitle: 'Chris Columbus', type: 'movie', color: 'from-green-600 to-emerald-700', cover: 'movies/hp-m2.png', content: hpM2Review },
+      { id: 'hp-m3', title: '哈利·波特与\n阿兹卡班的囚徒', subtitle: 'Alfonso Cuarón', type: 'movie', color: 'from-blue-600 to-indigo-700', cover: 'movies/hp-m3.png', content: hpM3Review },
+      { id: 'hp-m4', title: '哈利·波特与\n火焰杯', subtitle: 'Mike Newell', type: 'movie', color: 'from-orange-500 to-red-600', cover: 'movies/hp-m4.png', content: hpM4Review },
+      { id: 'hp-m5', title: '哈利·波特与\n凤凰社', subtitle: 'David Yates', type: 'movie', color: 'from-blue-500 to-cyan-600', cover: 'movies/hp-m5.png', content: hpM5Review },
+      { id: 'hp-m6', title: '哈利·波特与\n混血王子', subtitle: 'David Yates', type: 'movie', color: 'from-emerald-600 to-teal-700', cover: 'movies/hp-m6.png', content: hpM6Review },
+      { id: 'hp-m7', title: '哈利·波特与\n死亡圣器', subtitle: 'David Yates', type: 'movie', color: 'from-gray-600 to-slate-700', cover: 'movies/hp-m7.png', content: hpM7Review },
     ],
   },
   {
@@ -278,6 +280,7 @@ const movies: BookshelfItem[] = [
     subtitle: 'Frank Darabont',
     type: 'movie',
     color: 'from-sky-700 to-blue-800',
+    cover: 'movies/shawshank-redemption.png',
     content: shawshankReview,
   },
   {
@@ -286,6 +289,7 @@ const movies: BookshelfItem[] = [
     subtitle: 'Steven Spielberg',
     type: 'movie',
     color: 'from-amber-600 to-yellow-700',
+    cover: 'movies/catch-me-if-you-can.png',
     content: catchMeReview,
   },
   {
@@ -294,6 +298,7 @@ const movies: BookshelfItem[] = [
     subtitle: '庵野秀明',
     type: 'movie',
     color: 'from-purple-700 to-violet-800',
+    cover: 'movies/evangelion.png',
     content: evaReview,
   },
   {
@@ -302,6 +307,7 @@ const movies: BookshelfItem[] = [
     subtitle: '永山耕三',
     type: 'movie',
     color: 'from-pink-500 to-rose-600',
+    cover: 'movies/tokyo-love-story.png',
     content: tokyoLoveReview,
   },
   {
@@ -310,6 +316,7 @@ const movies: BookshelfItem[] = [
     subtitle: '张开宙',
     type: 'movie',
     color: 'from-emerald-600 to-green-700',
+    cover: 'movies/ming-lan.png',
     content: minglanReview,
   },
   {
@@ -318,6 +325,7 @@ const movies: BookshelfItem[] = [
     subtitle: '李国立',
     type: 'movie',
     color: 'from-cyan-600 to-blue-700',
+    cover: 'movies/xianjian-3.png',
     content: xianjian3Review,
   },
 ]

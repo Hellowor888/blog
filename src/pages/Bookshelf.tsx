@@ -27,9 +27,20 @@ function CoverCard({ item }: { item: BookshelfItem }) {
         </div>
       ) : (
         /* Single cover */
-        <div className={`w-36 h-48 rounded-lg bg-gradient-to-br ${item.color} shadow-lg group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center p-4 text-center mx-auto`}>
-          <span className="text-2xl mb-2">{item.type === 'book' ? '📖' : '🎬'}</span>
-          <span className="text-white font-bold text-sm leading-tight drop-shadow-md whitespace-pre-line">{item.title}</span>
+        <div className="w-36 h-48 mx-auto">
+          {item.cover ? (
+            <img
+              src={`/blog/covers/${item.cover}`}
+              alt={item.title}
+              className="w-36 h-48 rounded-lg object-cover shadow-lg group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-300"
+              loading="lazy"
+            />
+          ) : (
+            <div className={`w-36 h-48 rounded-lg bg-gradient-to-br ${item.color} shadow-lg group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center p-4 text-center`}>
+              <span className="text-2xl mb-2">{item.type === 'book' ? '📖' : '🎬'}</span>
+              <span className="text-white font-bold text-sm leading-tight drop-shadow-md whitespace-pre-line">{item.title}</span>
+            </div>
+          )}
         </div>
       )}
 
