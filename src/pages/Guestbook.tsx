@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { db } from '../config/cloudbase'
+import { db, authReady } from '../config/cloudbase'
 
 interface Message {
   _id: string
@@ -29,30 +29,45 @@ export default function Guestbook() {
   const [dbError, setDbError] = useState('')
   const pwdRef = useRef<HTMLInputElement>(null)
 
+  const watcherRef = useRef<any>(null)
+
   useEffect(() => {
     setDbStatus('connecting')
-    const watcher = db.collection('guestbook_messages')
-      .orderBy('createdAt', 'desc')
-      .watch({
-        onChange: (snapshot: any) => {
-          const msgs: Message[] = (snapshot.docs ?? []).map((d: any) => ({
-            _id: d._id ?? d.id,
-            ...d,
-          }))
-          console.log('CloudBase 实时同步:', msgs.length, '条留言')
-          setMessages(msgs)
-          setLoading(false)
-          setDbStatus('ok')
-        },
-        onError: (err: any) => {
-          console.error('CloudBase 监听失败:', err)
-          setDbStatus('error')
-          setDbError(err.message || String(err))
-          setLoading(false)
-        },
-      })
 
-    return () => watcher.close()
+    authReady.then(() => {
+      const watcher = db.collection('guestbook_messages')
+        .orderBy('createdAt', 'desc')
+        .watch({
+          onChange: (snapshot: any) => {
+            const msgs: Message[] = (snapshot.docs ?? []).map((d: any) => ({
+              _id: d._id ?? d.id,
+              ...d,
+            }))
+            console.log('CloudBase 实时同步:', msgs.length, '条留言')
+            setMessages(msgs)
+            setLoading(false)
+            setDbStatus('ok')
+          },
+          onError: (err: any) => {
+            console.error('CloudBase 监听失败:', err)
+            setDbStatus('error')
+            setDbError(err.message || String(err))
+            setLoading(false)
+          },
+        })
+      watcherRef.current = watcher
+    }).catch((err: any) => {
+      console.error('CloudBase 登录失败:', err)
+      setDbStatus('error')
+      setDbError('登录失败: ' + (err.message || String(err)))
+      setLoading(false)
+    })
+
+    return () => {
+      if (watcherRef.current) {
+        watcherRef.current.close()
+      }
+    }
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
