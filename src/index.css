@@ -88,6 +88,38 @@ body::after {
   letter-spacing: -0.01em;
 }
 
+/* ===== Logo 太阳光晕 ===== */
+.logo-sun-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-sun-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 146, 60, 0.5) 0%, rgba(239, 68, 68, 0.2) 40%, transparent 70%);
+  animation: sunPulse 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes sunPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+
+.logo-sun {
+  filter: drop-shadow(0 0 6px rgba(251, 146, 60, 0.6)) drop-shadow(0 0 12px rgba(239, 68, 68, 0.3));
+  transition: filter 0.3s ease;
+}
+
+.group:hover .logo-sun {
+  filter: drop-shadow(0 0 10px rgba(251, 146, 60, 0.8)) drop-shadow(0 0 20px rgba(239, 68, 68, 0.5));
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
 }

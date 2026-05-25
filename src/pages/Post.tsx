@@ -7,6 +7,7 @@ import rehypeSlug from 'rehype-slug'
 import { getPostBySlug } from '../utils/posts'
 import type { Post as PostType } from '../types'
 import TOC from '../components/TOC'
+import ReadingProgress from '../components/ReadingProgress'
 
 export default function Post() {
   const { slug } = useParams<{ slug: string }>()
@@ -32,13 +33,14 @@ export default function Post() {
 
   return (
     <div className="flex gap-8">
+      <ReadingProgress />
       <article className="min-w-0 flex-1">
         <header className="mb-8">
           <Link to="/" className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block">
             &larr; 返回首页
           </Link>
           <h1 className="text-2xl md:text-3xl font-bold mt-2 mb-3 gradient-text">{post.title}</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{post.date}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{post.date} &middot; 约 {post.readingTime} 分钟</p>
           <div className="flex flex-wrap gap-2">
             {post.tags.map((tag) => (
               <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">

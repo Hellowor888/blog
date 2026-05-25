@@ -19,7 +19,7 @@ export default function About() {
         如有任何问题或建议，欢迎通过以下方式联系我：
       </p>
       <p>
-        电话：<span className="text-gray-900 dark:text-gray-100 font-medium">8888-88886666</span>
+        邮箱：<a href="mailto:Chendongsheng0616@163.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">Chendongsheng0616@163.com</a>
       </p>
 
       <div className="mt-8">

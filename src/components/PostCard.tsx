@@ -15,7 +15,7 @@ export default function PostCard({ post, selectedTags, onTagClick }: PostCardPro
           {post.title}
         </h2>
       </Link>
-      <p className="text-sm text-gray-400 dark:text-gray-500 mb-3">{post.date}</p>
+      <p className="text-sm text-gray-400 dark:text-gray-500 mb-3">{post.date} &middot; 约 {post.readingTime} 分钟</p>
       <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{post.excerpt}</p>
       <div className="flex flex-wrap gap-2">
         {post.tags.map((tag) => (

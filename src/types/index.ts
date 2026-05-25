@@ -5,4 +5,5 @@ export interface Post {
   tags: string[]
   excerpt: string
   content: string
+  readingTime: number
 }

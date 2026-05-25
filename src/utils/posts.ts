@@ -5,6 +5,14 @@ const modules = import.meta.glob('../content/posts/*.md', {
   import: 'default',
 })
 
+function calcReadingTime(content: string): number {
+  const chineseChars = (content.match(/[一-鿿]/g) || []).length
+  const englishWords = (content.match(/[a-zA-Z]+/g) || []).length
+  // Chinese: ~400 chars/min, English: ~200 words/min
+  const minutes = Math.ceil(chineseChars / 400 + englishWords / 200)
+  return Math.max(1, minutes)
+}
+
 function parseFrontmatter(raw: string): { data: Record<string, unknown>; content: string } {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
   if (!match) return { data: {}, content: raw }
@@ -44,6 +52,7 @@ export async function getAllPosts(): Promise<Post[]> {
       tags: (data.tags as string[]) ?? [],
       excerpt: (data.excerpt as string) ?? '',
       content,
+      readingTime: calcReadingTime(content),
     })
   }
 

@@ -6,6 +6,10 @@ import Post from './pages/Post'
 import About from './pages/About'
 import Guestbook from './pages/Guestbook'
 import Collection from './pages/Collection'
+import Archive from './pages/Archive'
+import TagsPage from './pages/TagsPage'
+import BookshelfPage from './pages/Bookshelf'
+import BookshelfDetail from './pages/BookshelfDetail'
 
 export default function App() {
   const [dark, toggleDark] = useDarkMode()
@@ -19,6 +23,11 @@ export default function App() {
           <Route path="/collection/:id" element={<Collection />} />
           <Route path="/about" element={<About />} />
           <Route path="/guestbook" element={<Guestbook />} />
+          <Route path="/archive" element={<Archive />} />
+          <Route path="/tags" element={<TagsPage />} />
+          <Route path="/bookshelf" element={<BookshelfPage />} />
+          <Route path="/bookshelf/:id" element={<BookshelfDetail />} />
+          <Route path="/bookshelf/:id/detail" element={<BookshelfDetail />} />
         </Route>
       </Routes>
     </HashRouter>
