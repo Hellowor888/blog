@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, query, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, getDocs, Timestamp } from 'firebase/firestore'
+import { collection, query, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, Timestamp } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
 interface Message {
@@ -31,51 +31,34 @@ export default function Guestbook() {
   const pwdRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    let unsub = () => {}
-
-    async function init() {
-      try {
-        setDbStatus('connecting')
-        const snap = await getDocs(query(collection(db, 'guestbook_messages')))
-        const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() } as Message))
+    setDbStatus('connecting')
+    const q = query(collection(db, 'guestbook_messages'))
+    const unsub = onSnapshot(q,
+      (snapshot) => {
+        // 跳过空缓存快照，等服务器数据到达再渲染
+        if (snapshot.metadata.fromCache && snapshot.empty) {
+          console.log('跳过空缓存快照，等待服务器数据...')
+          return
+        }
+        const msgs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Message))
         msgs.sort((a, b) => {
           const ta = a.createdAt?.toMillis?.() ?? 0
           const tb = b.createdAt?.toMillis?.() ?? 0
           return tb - ta
         })
-        console.log('getDocs 服务器拉取:', msgs.length, '条留言')
+        console.log('onSnapshot 同步:', msgs.length, '条留言, fromCache:', snapshot.metadata.fromCache)
         setMessages(msgs)
         setLoading(false)
         setDbStatus('ok')
-      } catch (err: any) {
-        console.error('getDocs 失败:', err)
+      },
+      (err) => {
+        console.error('onSnapshot 失败:', err)
         setDbStatus('error')
         setDbError(err.message || '未知错误')
         setLoading(false)
       }
-
-      const q = query(collection(db, 'guestbook_messages'))
-      unsub = onSnapshot(q,
-        (snapshot) => {
-          const msgs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Message))
-          msgs.sort((a, b) => {
-            const ta = a.createdAt?.toMillis?.() ?? 0
-            const tb = b.createdAt?.toMillis?.() ?? 0
-            return tb - ta
-          })
-          console.log('onSnapshot 更新:', msgs.length, '条留言')
-          setMessages(msgs)
-          setLoading(false)
-        },
-        (err) => {
-          console.error('onSnapshot 失败:', err)
-          setDbError(err.message || '未知错误')
-        }
-      )
-    }
-
-    init()
-    return () => unsub()
+    )
+    return unsub
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,7 +103,6 @@ export default function Guestbook() {
     <div>
       <h1 className="text-xl md:text-2xl font-bold mb-6 gradient-text">给我留言</h1>
 
-      {/* Firestore 连接状态（调试用，后续可删） */}
       {dbStatus !== 'ok' && (
         <div className={`mb-4 p-3 rounded-lg text-sm ${
           dbStatus === 'connecting'
