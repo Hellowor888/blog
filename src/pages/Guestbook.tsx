@@ -26,6 +26,8 @@ export default function Guestbook() {
   const [authed, setAuthed] = useState(false)
   const [pwd, setPwd] = useState('')
   const [pwdError, setPwdError] = useState(false)
+  const [dbStatus, setDbStatus] = useState<'connecting' | 'ok' | 'error'>('connecting')
+  const [dbError, setDbError] = useState('')
   const pwdRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -33,22 +35,25 @@ export default function Guestbook() {
 
     async function init() {
       try {
-        // 先用 getDocs 从服务器拉取数据，避免 onSnapshot 缓存问题
+        setDbStatus('connecting')
         const snap = await getDocs(query(collection(db, 'guestbook_messages')))
-        const serverMsgs = snap.docs.map(d => ({ id: d.id, ...d.data() } as Message))
-        serverMsgs.sort((a, b) => {
+        const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() } as Message))
+        msgs.sort((a, b) => {
           const ta = a.createdAt?.toMillis?.() ?? 0
           const tb = b.createdAt?.toMillis?.() ?? 0
           return tb - ta
         })
-        console.log('getDocs 从服务器拉取:', serverMsgs.length, '条留言')
-        setMessages(serverMsgs)
+        console.log('getDocs 服务器拉取:', msgs.length, '条留言')
+        setMessages(msgs)
         setLoading(false)
+        setDbStatus('ok')
       } catch (err: any) {
         console.error('getDocs 失败:', err)
+        setDbStatus('error')
+        setDbError(err.message || '未知错误')
+        setLoading(false)
       }
 
-      // 然后开启实时监听
       const q = query(collection(db, 'guestbook_messages'))
       unsub = onSnapshot(q,
         (snapshot) => {
@@ -64,6 +69,7 @@ export default function Guestbook() {
         },
         (err) => {
           console.error('onSnapshot 失败:', err)
+          setDbError(err.message || '未知错误')
         }
       )
     }
@@ -84,15 +90,10 @@ export default function Guestbook() {
         createdAt: serverTimestamp(),
       })
       console.log('留言已写入 Firestore, ID:', docRef.id)
-
-      // 立即查询验证数据是否已写入
-      const snap = await getDocs(query(collection(db, 'guestbook_messages')))
-      console.log('当前 Firestore 留言总数:', snap.size, '条')
-
       setName('')
       setText('')
       setSubmitted(true)
-      setTimeout(() => setSubmitted(false), 2000)
+      setTimeout(() => setSubmitted(false), 2500)
     } catch (err: any) {
       console.error('留言提交失败:', err)
       alert('留言提交失败: ' + (err.message || '未知错误'))
@@ -118,6 +119,17 @@ export default function Guestbook() {
   return (
     <div>
       <h1 className="text-xl md:text-2xl font-bold mb-6 gradient-text">给我留言</h1>
+
+      {/* Firestore 连接状态（调试用，后续可删） */}
+      {dbStatus !== 'ok' && (
+        <div className={`mb-4 p-3 rounded-lg text-sm ${
+          dbStatus === 'connecting'
+            ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'
+            : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
+        }`}>
+          {dbStatus === 'connecting' ? '数据库连接中...' : `数据库连接失败: ${dbError}`}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="mb-8 p-4 md:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur">
         <div className="mb-4">
@@ -146,18 +158,20 @@ export default function Guestbook() {
             className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-sm resize-none"
           />
         </div>
-        <button
-          type="submit"
-          disabled={!name.trim() || !text.trim()}
-          className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
-        >
-          提交留言
-        </button>
-        {submitted && (
-          <span className="ml-3 text-green-600 dark:text-green-400 text-sm">
-            留言成功，感谢！
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={!name.trim() || !text.trim()}
+            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            提交留言
+          </button>
+          {submitted && (
+            <span className="px-3 py-1.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium animate-pulse">
+              留言成功！
+            </span>
+          )}
+        </div>
       </form>
 
       {!authed ? (
