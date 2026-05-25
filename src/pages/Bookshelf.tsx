@@ -3,62 +3,69 @@ import { Link } from 'react-router-dom'
 import { getAllBooks, getAllMovies } from '../data/bookshelf'
 import type { BookshelfItem } from '../data/bookshelf'
 
-function SeriesStack({ item }: { item: BookshelfItem }) {
-  const kids = item.children!.slice(0, 3)
+function SeriesStack({ item, expanded }: { item: BookshelfItem; expanded: boolean }) {
+  const kids = item.children!
 
   return (
     <div className="relative w-36 h-48 mx-auto">
-      {/* Render back to front so earlier covers peek out behind */}
-      {kids.map((kid, i) => {
-        const n = kids.length
-        const pos = n - 1 - i // 0 = front, 1 = middle, 2 = back
-        const tx = pos * 4   // 0, 4, 8 px right
-        const ty = -(pos * 5) // 0, -5, -10 px up
-        return (
-          <div
-            key={kid.id}
-            className="absolute top-0 left-0 w-36 h-48 rounded-lg overflow-hidden shadow-md"
-            style={{
-              transform: `translate(${tx}px, ${ty}px)`,
-              zIndex: 10 - pos,
-            }}
-          >
-            {kid.cover ? (
-              <img
-                src={`/blog/covers/${kid.cover}`}
-                alt={kid.title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <div className={`w-full h-full bg-gradient-to-br ${kid.color} flex flex-col items-center justify-center p-3 text-center`}>
-                <span className="text-lg mb-1">{kid.type === 'book' ? '📖' : '🎬'}</span>
-                <span className="text-white font-bold text-[10px] leading-tight drop-shadow-md whitespace-pre-line">{kid.title}</span>
-              </div>
-            )}
-          </div>
-        )
-      })}
-      {/* Series name badge */}
-      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-2.5 py-0.5 rounded-full shadow border border-gray-200 dark:border-gray-700 z-20">
-        <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
-          {item.title}
-        </span>
-      </div>
+      {kids.map((kid, i) => (
+        <div
+          key={kid.id}
+          className="absolute top-0 w-36 h-48 rounded-lg overflow-hidden shadow-md transition-all duration-300 ease-out"
+          style={{
+            left: expanded ? `${i * 37}px` : '0px',
+            zIndex: kids.length - i,
+            transitionDelay: expanded
+              ? `${i * 50}ms`
+              : `${(kids.length - 1 - i) * 30}ms`,
+          }}
+        >
+          {kid.cover ? (
+            <img
+              src={`/blog/covers/${kid.cover}`}
+              alt={kid.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className={`w-full h-full bg-gradient-to-br ${kid.color} flex flex-col items-center justify-center p-3 text-center`}>
+              <span className="text-lg mb-1">{kid.type === 'book' ? '📖' : '🎬'}</span>
+              <span className="text-white font-bold text-[10px] leading-tight drop-shadow-md whitespace-pre-line">{kid.title}</span>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   )
 }
 
 function CoverCard({ item }: { item: BookshelfItem }) {
   const hasChildren = item.children && item.children.length > 0
+  const [expanded, setExpanded] = useState(false)
+
+  const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (hasChildren && isTouchDevice && !expanded) {
+      e.preventDefault()
+      setExpanded(true)
+    }
+  }
+
+  const linkTo = hasChildren
+    ? `/bookshelf/${item.id}`
+    : `/bookshelf/${item.id}/detail`
 
   return (
     <Link
-      to={hasChildren ? `/bookshelf/${item.id}` : `/bookshelf/${item.id}/detail`}
+      to={linkTo}
       className="block group"
+      onClick={handleClick}
+      onMouseEnter={() => hasChildren && !isTouchDevice && setExpanded(true)}
+      onMouseLeave={() => hasChildren && !isTouchDevice && setExpanded(false)}
     >
       {hasChildren ? (
-        <SeriesStack item={item} />
+        <SeriesStack item={item} expanded={expanded} />
       ) : (
         /* Single cover */
         <div className="w-36 h-48 mx-auto">
@@ -78,7 +85,7 @@ function CoverCard({ item }: { item: BookshelfItem }) {
         </div>
       )}
 
-      {/* Title and subtitle below the cover */}
+      {/* Subtitle below the cover */}
       <div className="text-center mt-3">
         <p className="text-xs text-gray-500 dark:text-gray-400">{item.subtitle}</p>
       </div>
