@@ -8,7 +8,7 @@ interface Message {
   createdAt?: string
 }
 
-const API_BASE = 'https://guestbook-messages-d9cr3be1af85c.service.tcloudbase.com/guestbook'
+const API_BASE = 'https://guestbook-messages-d9cr3be1af85c-1436650635.ap-shanghai.app.tcloudbase.com/guestbook'
 const ADMIN_PASSWORD_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
 
 async function sha256(message: string): Promise<string> {
