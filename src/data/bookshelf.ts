@@ -252,6 +252,7 @@ const books: BookshelfItem[] = [
     subtitle: 'Hilary Glasman-deal',
     type: 'book',
     color: 'from-blue-800 to-cyan-700',
+    cover: 'books/science-research-writing.png',
     content: scienceWritingReview,
   },
 ]

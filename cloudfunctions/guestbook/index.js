@@ -87,7 +87,7 @@ exports.main = async (event) => {
       return { statusCode: 200, headers, body: JSON.stringify({ code: 0, data: { id: res.id } }) }
     }
 
-    // DELETE — remove a message or review (try guestbook first, then bookshelf)
+    // DELETE — remove a message or review
     if (method === 'DELETE') {
       const path = event.path || ''
       const id = path.split('/').pop()
@@ -95,18 +95,15 @@ exports.main = async (event) => {
         return { statusCode: 400, headers, body: JSON.stringify({ code: 1, message: '缺少ID' }) }
       }
 
-      // Try guestbook_messages first
-      try {
-        await db.collection('guestbook_messages').doc(id).remove()
-        return { statusCode: 200, headers, body: JSON.stringify({ code: 0 }) }
-      } catch {}
+      // Try both collections independently (don't return early — some backends
+      // silently succeed on non-existent docs, which would skip the second collection)
+      let deleted = false
+      try { await db.collection('guestbook_messages').doc(id).remove(); deleted = true } catch {}
+      try { await db.collection('bookshelf_reviews').doc(id).remove(); deleted = true } catch {}
 
-      // Try bookshelf_reviews
-      try {
-        await db.collection('bookshelf_reviews').doc(id).remove()
+      if (deleted) {
         return { statusCode: 200, headers, body: JSON.stringify({ code: 0 }) }
-      } catch {}
-
+      }
       return { statusCode: 404, headers, body: JSON.stringify({ code: 1, message: '未找到该记录' }) }
     }
 

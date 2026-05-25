@@ -3,6 +3,56 @@ import { Link } from 'react-router-dom'
 import { getAllBooks, getAllMovies } from '../data/bookshelf'
 import type { BookshelfItem } from '../data/bookshelf'
 
+function SeriesStack({ item }: { item: BookshelfItem }) {
+  const kids = item.children!.slice(0, 3)
+  // Offsets for diagonal cascade toward upper-right
+  const offsets = [
+    { x: 0, y: 0, rotate: 'rotate-0', z: 'z-10' },
+    { x: 14, y: -14, rotate: 'rotate-[6deg]', z: 'z-[5]' },
+    { x: 28, y: -28, rotate: 'rotate-[12deg]', z: 'z-0' },
+  ]
+
+  return (
+    <div className="relative h-56 w-40 mx-auto">
+      {kids.map((kid, i) => {
+        const idx = kids.length - 1 - i // render back to front
+        const o = offsets[idx]
+        return (
+          <div
+            key={kid.id}
+            className={`absolute inset-0 w-36 h-48 rounded-lg shadow-lg ${o.z}`}
+            style={{
+              transform: `translate(${o.x}px, ${o.y}px)`,
+            }}
+          >
+            <div className={`w-36 h-48 rounded-lg overflow-hidden ${o.rotate}`}>
+              {kid.cover ? (
+                <img
+                  src={`/blog/covers/${kid.cover}`}
+                  alt={kid.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className={`w-full h-full bg-gradient-to-br ${kid.color} flex flex-col items-center justify-center p-3 text-center`}>
+                  <span className="text-lg mb-1">{kid.type === 'book' ? '📖' : '🎬'}</span>
+                  <span className="text-white font-bold text-[10px] leading-tight drop-shadow-md whitespace-pre-line">{kid.title}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })}
+      {/* Series label badge */}
+      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-3 py-0.5 rounded-full shadow border border-gray-200 dark:border-gray-700 z-20">
+        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
+          {item.children!.length} 部 · {item.type === 'book' ? '系列' : '系列'}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 function CoverCard({ item }: { item: BookshelfItem }) {
   const hasChildren = item.children && item.children.length > 0
 
@@ -12,19 +62,7 @@ function CoverCard({ item }: { item: BookshelfItem }) {
       className="block group"
     >
       {hasChildren ? (
-        /* Stacked series — 3 covers slightly offset */
-        <div className="relative h-48 w-36 mx-auto">
-          {/* Back cover */}
-          <div className={`absolute inset-0 w-36 h-48 rounded-lg bg-gradient-to-br ${item.color} shadow-lg rotate-[-8deg] origin-bottom-left opacity-60`} />
-          {/* Middle cover */}
-          <div className={`absolute inset-0 w-36 h-48 rounded-lg bg-gradient-to-br ${item.color} shadow-lg rotate-[4deg] origin-bottom-right opacity-80`} />
-          {/* Front cover */}
-          <div className={`absolute inset-0 w-36 h-48 rounded-lg bg-gradient-to-br ${item.color} shadow-xl flex flex-col items-center justify-center p-4 text-center`}>
-            <span className="text-2xl mb-2">{item.type === 'book' ? '📖' : '🎬'}</span>
-            <span className="text-white font-bold text-sm leading-tight drop-shadow-md">{item.title}</span>
-            <span className="text-white/70 text-[10px] mt-1 drop-shadow-md">{item.children!.length} 部</span>
-          </div>
-        </div>
+        <SeriesStack item={item} />
       ) : (
         /* Single cover */
         <div className="w-36 h-48 mx-auto">
