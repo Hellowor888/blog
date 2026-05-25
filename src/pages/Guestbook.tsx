@@ -1,19 +1,29 @@
-import { useState, useEffect, useRef } from 'react'
-import { db, authReady } from '../config/cloudbase'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
 interface Message {
   _id: string
   name: string
   text: string
   time: string
-  createdAt?: Date
+  createdAt?: string
 }
 
+const API_BASE = 'https://guestbook-messages-d9cr3be1af85c.service.tcloudbase.com/guestbook'
 const ADMIN_PASSWORD_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
 
 async function sha256(message: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(message))
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function api(path: string, options?: RequestInit) {
+  const res = await fetch(API_BASE + path, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+  })
+  const json = await res.json()
+  if (json.code !== 0) throw new Error(json.message || '请求失败')
+  return json.data
 }
 
 export default function Guestbook() {
@@ -29,63 +39,45 @@ export default function Guestbook() {
   const [dbError, setDbError] = useState('')
   const pwdRef = useRef<HTMLInputElement>(null)
 
-  const watcherRef = useRef<any>(null)
-
-  useEffect(() => {
-    setDbStatus('connecting')
-
-    authReady.then(() => {
-      const watcher = db.collection('guestbook_messages')
-        .orderBy('createdAt', 'desc')
-        .watch({
-          onChange: (snapshot: any) => {
-            const msgs: Message[] = (snapshot.docs ?? []).map((d: any) => ({
-              _id: d._id ?? d.id,
-              ...d,
-            }))
-            console.log('CloudBase 实时同步:', msgs.length, '条留言')
-            setMessages(msgs)
-            setLoading(false)
-            setDbStatus('ok')
-          },
-          onError: (err: any) => {
-            console.error('CloudBase 监听失败:', err)
-            setDbStatus('error')
-            setDbError(err.message || String(err))
-            setLoading(false)
-          },
-        })
-      watcherRef.current = watcher
-    }).catch((err: any) => {
-      console.error('CloudBase 登录失败:', err)
-      setDbStatus('error')
-      setDbError('登录失败: ' + (err.message || String(err)))
+  const loadMessages = useCallback(async () => {
+    try {
+      setDbStatus('connecting')
+      const msgs = await api('')
+      setMessages(msgs || [])
+      setDbStatus('ok')
       setLoading(false)
-    })
-
-    return () => {
-      if (watcherRef.current) {
-        watcherRef.current.close()
-      }
+    } catch (err: any) {
+      console.error('加载留言失败:', err)
+      setDbStatus('error')
+      setDbError(err.message || String(err))
+      setLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    loadMessages()
+  }, [loadMessages])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim() || !text.trim()) return
 
     try {
-      await db.collection('guestbook_messages').add({
-        name: name.trim(),
-        text: text.trim(),
-        time: new Date().toLocaleString('zh-CN'),
-        createdAt: new Date(),
+      await api('', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: name.trim(),
+          text: text.trim(),
+          time: new Date().toLocaleString('zh-CN'),
+        }),
       })
-      console.log('留言已写入 CloudBase')
+      console.log('留言已提交')
       setName('')
       setText('')
       setSubmitted(true)
       setTimeout(() => setSubmitted(false), 2500)
+      // 重新加载留言列表
+      await loadMessages()
     } catch (err: any) {
       console.error('留言提交失败:', err)
       alert('留言提交失败: ' + (err.message || '未知错误'))
@@ -106,7 +98,8 @@ export default function Guestbook() {
   const handleDelete = async (id: string) => {
     if (!authed) return
     try {
-      await db.collection('guestbook_messages').doc(id).remove()
+      await api('/' + id, { method: 'DELETE' })
+      setMessages(prev => prev.filter(m => m._id !== id))
     } catch (err: any) {
       console.error('删除失败:', err)
     }
