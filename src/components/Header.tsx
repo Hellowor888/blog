@@ -28,18 +28,30 @@ export default function Header({ darkToggle, onSearch }: HeaderProps) {
     <header className="sticky top-0 z-20 backdrop-blur-xl bg-white/70 dark:bg-gray-950/70 border-b border-gray-200/50 dark:border-gray-800/50">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 shrink-0 group">
-          {/* Logo — glowing red sun */}
+          {/* Logo — anime-style sun */}
           <div className="logo-sun-wrapper">
             <svg className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 logo-sun" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <radialGradient id="sunGlow" cx="40%" cy="35%" r="60%">
-                  <stop offset="0%" stopColor="#fbbf24" />
-                  <stop offset="40%" stopColor="#f97316" />
-                  <stop offset="75%" stopColor="#ef4444" />
-                  <stop offset="100%" stopColor="#dc2626" />
+                <radialGradient id="sunGlow" cx="45%" cy="40%" r="55%">
+                  <stop offset="0%" stopColor="#fef08a" />
+                  <stop offset="35%" stopColor="#fbbf24" />
+                  <stop offset="70%" stopColor="#fb923c" />
+                  <stop offset="100%" stopColor="#f97316" />
                 </radialGradient>
               </defs>
-              <circle cx="24" cy="24" r="17" fill="url(#sunGlow)" />
+              {/* Rays — alternating long and short */}
+              <polygon points="24,2 27,11 21,11" fill="url(#sunGlow)" opacity="0.7" />
+              <polygon points="39,9 36,17 33,8" fill="url(#sunGlow)" opacity="0.55" />
+              <polygon points="46,24 37,23 40,17" fill="url(#sunGlow)" opacity="0.7" />
+              <polygon points="39,39 34,33 41,31" fill="url(#sunGlow)" opacity="0.55" />
+              <polygon points="24,46 23,37 29,37" fill="url(#sunGlow)" opacity="0.7" />
+              <polygon points="9,39 14,33 7,31" fill="url(#sunGlow)" opacity="0.55" />
+              <polygon points="2,24 11,23 8,17" fill="url(#sunGlow)" opacity="0.7" />
+              <polygon points="9,9 12,17 5,16" fill="url(#sunGlow)" opacity="0.55" />
+              {/* Central sun body */}
+              <circle cx="24" cy="24" r="10.5" fill="url(#sunGlow)" />
+              {/* Highlight */}
+              <circle cx="21" cy="21" r="3.5" fill="white" opacity="0.25" />
             </svg>
           </div>
           <span className="blog-title text-xl sm:text-2xl font-bold gradient-text">
@@ -51,7 +63,6 @@ export default function Header({ darkToggle, onSearch }: HeaderProps) {
         <nav className="hidden md:flex items-center gap-0.5">
           <Link to="/" className={linkClass('/')}>首页</Link>
           <Link to="/archive" className={linkClass('/archive')}>归档</Link>
-          <Link to="/tags" className={linkClass('/tags')}>标签</Link>
           <Link to="/bookshelf" className={linkClass('/bookshelf')}>读书&观影</Link>
           <Link to="/guestbook" className={linkClass('/guestbook')}>留言</Link>
           <Link to="/about" className={linkClass('/about')}>关于</Link>
@@ -92,7 +103,6 @@ export default function Header({ darkToggle, onSearch }: HeaderProps) {
         <nav className="md:hidden border-t border-gray-200/50 dark:border-gray-800/50 bg-white/90 dark:bg-gray-950/90 backdrop-blur-xl px-4 py-3 space-y-1">
           <Link to="/" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/')}>首页</Link>
           <Link to="/archive" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/archive')}>归档</Link>
-          <Link to="/tags" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/tags')}>标签</Link>
           <Link to="/bookshelf" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/bookshelf')}>读书&观影</Link>
           <Link to="/guestbook" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/guestbook')}>留言</Link>
           <Link to="/about" onClick={() => setMenuOpen(false)} className={mobileLinkClass('/about')}>关于</Link>

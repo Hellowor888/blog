@@ -3,38 +3,39 @@ import { Link } from 'react-router-dom'
 import { getAllBooks, getAllMovies } from '../data/bookshelf'
 import type { BookshelfItem } from '../data/bookshelf'
 
-function ItemCard({ item }: { item: BookshelfItem }) {
+function CoverCard({ item }: { item: BookshelfItem }) {
   const hasChildren = item.children && item.children.length > 0
 
   return (
     <Link
       to={hasChildren ? `/bookshelf/${item.id}` : `/bookshelf/${item.id}/detail`}
-      className="glass-card glass-card-hover rounded-xl px-5 py-4 flex items-center gap-4"
+      className="block group"
     >
-      {/* Icon */}
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg shrink-0 ${
-        item.type === 'book'
-          ? 'bg-amber-100/80 dark:bg-amber-900/30'
-          : 'bg-rose-100/80 dark:bg-rose-900/30'
-      }`}>
-        {item.type === 'book' ? '📖' : '🎬'}
-      </div>
+      {hasChildren ? (
+        /* Stacked series — 3 covers slightly offset */
+        <div className="relative h-48 w-36 mx-auto">
+          {/* Back cover */}
+          <div className={`absolute inset-0 w-36 h-48 rounded-lg bg-gradient-to-br ${item.color} shadow-lg rotate-[-8deg] origin-bottom-left opacity-60`} />
+          {/* Middle cover */}
+          <div className={`absolute inset-0 w-36 h-48 rounded-lg bg-gradient-to-br ${item.color} shadow-lg rotate-[4deg] origin-bottom-right opacity-80`} />
+          {/* Front cover */}
+          <div className={`absolute inset-0 w-36 h-48 rounded-lg bg-gradient-to-br ${item.color} shadow-xl flex flex-col items-center justify-center p-4 text-center`}>
+            <span className="text-2xl mb-2">{item.type === 'book' ? '📖' : '🎬'}</span>
+            <span className="text-white font-bold text-sm leading-tight drop-shadow-md">{item.title}</span>
+            <span className="text-white/70 text-[10px] mt-1 drop-shadow-md">{item.children!.length} 部</span>
+          </div>
+        </div>
+      ) : (
+        /* Single cover */
+        <div className={`w-36 h-48 rounded-lg bg-gradient-to-br ${item.color} shadow-lg group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center p-4 text-center mx-auto`}>
+          <span className="text-2xl mb-2">{item.type === 'book' ? '📖' : '🎬'}</span>
+          <span className="text-white font-bold text-sm leading-tight drop-shadow-md whitespace-pre-line">{item.title}</span>
+        </div>
+      )}
 
-      <div className="min-w-0 flex-1">
-        <h3 className="font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">{item.title}</h3>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{item.subtitle}</p>
-      </div>
-
-      <div className="shrink-0 text-gray-300 dark:text-gray-600">
-        {hasChildren ? (
-          <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full text-gray-500 dark:text-gray-400">
-            {item.children!.length} 部
-          </span>
-        ) : (
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        )}
+      {/* Title and subtitle below the cover */}
+      <div className="text-center mt-3">
+        <p className="text-xs text-gray-500 dark:text-gray-400">{item.subtitle}</p>
       </div>
     </Link>
   )
@@ -50,26 +51,26 @@ export default function BookshelfPage() {
 
       {/* Books */}
       <section className="mb-10">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-5 flex items-center gap-2">
           <span className="w-1 h-5 rounded-full bg-amber-400" />
           在读 / 读过
         </h2>
-        <div className="grid gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {books.map((item) => (
-            <ItemCard key={item.id} item={item} />
+            <CoverCard key={item.id} item={item} />
           ))}
         </div>
       </section>
 
       {/* Movies */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-5 flex items-center gap-2">
           <span className="w-1 h-5 rounded-full bg-rose-400" />
           在看 / 看过
         </h2>
-        <div className="grid gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {movies.map((item) => (
-            <ItemCard key={item.id} item={item} />
+            <CoverCard key={item.id} item={item} />
           ))}
         </div>
       </section>

@@ -101,7 +101,7 @@ body::after {
   position: absolute;
   inset: -6px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(251, 146, 60, 0.5) 0%, rgba(239, 68, 68, 0.2) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.5) 0%, rgba(249, 115, 22, 0.2) 40%, transparent 70%);
   animation: sunPulse 2.5s ease-in-out infinite;
   pointer-events: none;
 }
@@ -112,12 +112,12 @@ body::after {
 }
 
 .logo-sun {
-  filter: drop-shadow(0 0 6px rgba(251, 146, 60, 0.6)) drop-shadow(0 0 12px rgba(239, 68, 68, 0.3));
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6)) drop-shadow(0 0 14px rgba(249, 115, 22, 0.3));
   transition: filter 0.3s ease;
 }
 
 .group:hover .logo-sun {
-  filter: drop-shadow(0 0 10px rgba(251, 146, 60, 0.8)) drop-shadow(0 0 20px rgba(239, 68, 68, 0.5));
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 22px rgba(249, 115, 22, 0.5));
 }
 
 .animate-fade-in-up {

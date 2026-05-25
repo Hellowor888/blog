@@ -17,6 +17,7 @@ export default function BookshelfDetail() {
 
   const hasChildren = item.children && item.children.length > 0
 
+  // Series collection view
   if (hasChildren) {
     return (
       <div>
@@ -25,34 +26,28 @@ export default function BookshelfDetail() {
         </Link>
 
         <header className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-1">
             <span className="text-2xl">{item.type === 'book' ? '📖' : '🎬'}</span>
             <h1 className="text-2xl md:text-3xl font-bold gradient-text">{item.title}</h1>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">{item.subtitle}</p>
         </header>
 
-        <div className="grid gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {item.children!.map((child) => (
             <Link
               key={child.id}
               to={`/bookshelf/${child.id}/detail`}
-              className="glass-card glass-card-hover rounded-xl px-5 py-4 flex items-center gap-4"
+              className="block group"
             >
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                child.type === 'book'
-                  ? 'bg-amber-100/80 dark:bg-amber-900/30'
-                  : 'bg-rose-100/80 dark:bg-rose-900/30'
-              }`}>
-                {child.type === 'book' ? '📖' : '🎬'}
+              {/* Single cover card */}
+              <div className={`w-36 h-48 rounded-lg bg-gradient-to-br ${child.color} shadow-lg group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center p-4 text-center mx-auto`}>
+                <span className="text-2xl mb-2">{child.type === 'book' ? '📖' : '🎬'}</span>
+                <span className="text-white font-bold text-sm leading-tight drop-shadow-md whitespace-pre-line">{child.title}</span>
               </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">{child.title}</h3>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{child.subtitle}</p>
+              <div className="text-center mt-3">
+                <p className="text-xs text-gray-500 dark:text-gray-400">{child.subtitle}</p>
               </div>
-              <svg className="w-4 h-4 text-gray-300 dark:text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
             </Link>
           ))}
         </div>
@@ -68,7 +63,7 @@ export default function BookshelfDetail() {
       </Link>
 
       <header className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3 mb-1">
           <span className="text-2xl">{item.type === 'book' ? '📖' : '🎬'}</span>
           <h1 className="text-2xl md:text-3xl font-bold gradient-text">{item.title}</h1>
         </div>
