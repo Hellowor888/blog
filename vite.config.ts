@@ -39,7 +39,7 @@ function rssPlugin(): Plugin {
       const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-  <title>rising from the east</title>
+  <title>Rising From The East</title>
   <link>${SITE}</link>
   <description>个人博客 · 生活随想、学习笔记、生活分享</description>
   <language>zh-CN</language>
