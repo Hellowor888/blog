@@ -24,8 +24,9 @@ exports.main = async (event) => {
   const method = event.httpMethod
   const query = event.queryStringParameters || {}
   const body = (() => {
-    try { return JSON.parse(event.body || '{}') }
-    catch { return {} }
+    if (!event.body) return {}
+    if (typeof event.body === 'object') return event.body
+    try { return JSON.parse(event.body) } catch { return {} }
   })()
 
   // Detect bookshelf requests by presence of "itemId" in query or body
