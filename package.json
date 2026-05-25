@@ -10,6 +10,7 @@
     "deploy": "npm run build && npx gh-pages -d dist"
   },
   "dependencies": {
+    "@cloudbase/js-sdk": "^3.3.10",
     "firebase": "^12.13.0",
     "gray-matter": "^4.0.3",
     "react": "^18.3.1",

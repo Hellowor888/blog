@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, query, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, Timestamp } from 'firebase/firestore'
-import { db } from '../config/firebase'
+import { db } from '../config/cloudbase'
 
 interface Message {
-  id: string
+  _id: string
   name: string
   text: string
   time: string
-  createdAt?: Timestamp
+  createdAt?: Date
 }
 
 const ADMIN_PASSWORD_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
@@ -32,33 +31,28 @@ export default function Guestbook() {
 
   useEffect(() => {
     setDbStatus('connecting')
-    const q = query(collection(db, 'guestbook_messages'))
-    const unsub = onSnapshot(q,
-      (snapshot) => {
-        // 跳过空缓存快照，等服务器数据到达再渲染
-        if (snapshot.metadata.fromCache && snapshot.empty) {
-          console.log('跳过空缓存快照，等待服务器数据...')
-          return
-        }
-        const msgs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Message))
-        msgs.sort((a, b) => {
-          const ta = a.createdAt?.toMillis?.() ?? 0
-          const tb = b.createdAt?.toMillis?.() ?? 0
-          return tb - ta
-        })
-        console.log('onSnapshot 同步:', msgs.length, '条留言, fromCache:', snapshot.metadata.fromCache)
-        setMessages(msgs)
-        setLoading(false)
-        setDbStatus('ok')
-      },
-      (err) => {
-        console.error('onSnapshot 失败:', err)
-        setDbStatus('error')
-        setDbError(err.message || '未知错误')
-        setLoading(false)
-      }
-    )
-    return unsub
+    const watcher = db.collection('guestbook_messages')
+      .orderBy('createdAt', 'desc')
+      .watch({
+        onChange: (snapshot: any) => {
+          const msgs: Message[] = (snapshot.docs ?? []).map((d: any) => ({
+            _id: d._id ?? d.id,
+            ...d,
+          }))
+          console.log('CloudBase 实时同步:', msgs.length, '条留言')
+          setMessages(msgs)
+          setLoading(false)
+          setDbStatus('ok')
+        },
+        onError: (err: any) => {
+          console.error('CloudBase 监听失败:', err)
+          setDbStatus('error')
+          setDbError(err.message || String(err))
+          setLoading(false)
+        },
+      })
+
+    return () => watcher.close()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,13 +60,13 @@ export default function Guestbook() {
     if (!name.trim() || !text.trim()) return
 
     try {
-      const docRef = await addDoc(collection(db, 'guestbook_messages'), {
+      await db.collection('guestbook_messages').add({
         name: name.trim(),
         text: text.trim(),
         time: new Date().toLocaleString('zh-CN'),
-        createdAt: serverTimestamp(),
+        createdAt: new Date(),
       })
-      console.log('留言已写入 Firestore, ID:', docRef.id)
+      console.log('留言已写入 CloudBase')
       setName('')
       setText('')
       setSubmitted(true)
@@ -96,7 +90,11 @@ export default function Guestbook() {
 
   const handleDelete = async (id: string) => {
     if (!authed) return
-    await deleteDoc(doc(db, 'guestbook_messages', id))
+    try {
+      await db.collection('guestbook_messages').doc(id).remove()
+    } catch (err: any) {
+      console.error('删除失败:', err)
+    }
   }
 
   return (
@@ -203,14 +201,14 @@ export default function Guestbook() {
           ) : (
             <div className="grid gap-4">
               {messages.map((msg) => (
-                <div key={msg.id} className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur">
+                <div key={msg._id} className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <span className="font-medium text-sm">{msg.name}</span>
                       <span className="text-xs text-gray-400 dark:text-gray-500 ml-3">{msg.time}</span>
                     </div>
                     <button
-                      onClick={() => handleDelete(msg.id)}
+                      onClick={() => handleDelete(msg._id)}
                       className="text-xs text-gray-400 hover:text-red-500 transition-colors"
                       title="删除留言"
                     >
