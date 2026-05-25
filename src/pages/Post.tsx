@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
+import rehypeSlug from 'rehype-slug'
 import { getPostBySlug } from '../utils/posts'
 import type { Post as PostType } from '../types'
+import TOC from '../components/TOC'
 
 export default function Post() {
   const { slug } = useParams<{ slug: string }>()
@@ -28,27 +31,34 @@ export default function Post() {
   }
 
   return (
-    <article>
-      <header className="mb-8">
-        <Link to="/" className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block">
-          &larr; 返回首页
-        </Link>
-        <h1 className="text-2xl md:text-3xl font-bold mt-2 mb-3 gradient-text">{post.title}</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{post.date}</p>
-        <div className="flex flex-wrap gap-2">
-          {post.tags.map((tag) => (
-            <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-              {tag}
-            </span>
-          ))}
-        </div>
-      </header>
+    <div className="flex gap-8">
+      <article className="min-w-0 flex-1">
+        <header className="mb-8">
+          <Link to="/" className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block">
+            &larr; 返回首页
+          </Link>
+          <h1 className="text-2xl md:text-3xl font-bold mt-2 mb-3 gradient-text">{post.title}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{post.date}</p>
+          <div className="flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </header>
 
-      <div className="prose dark:prose-invert max-w-none prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-img:rounded-xl">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {post.content}
-        </ReactMarkdown>
-      </div>
-    </article>
+        <div className="prose dark:prose-invert max-w-none">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight, rehypeSlug]}
+          >
+            {post.content}
+          </ReactMarkdown>
+        </div>
+      </article>
+
+      <TOC content={post.content} />
+    </div>
   )
 }

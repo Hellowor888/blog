@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 
 interface HeaderProps {
   darkToggle: React.ReactNode
+  onSearch: () => void
 }
 
 export default function Header({ darkToggle }: HeaderProps) {
@@ -35,11 +36,21 @@ export default function Header({ darkToggle }: HeaderProps) {
           <Link to="/" className={linkClass('/')}>首页</Link>
           <Link to="/guestbook" className={linkClass('/guestbook')}>给我留言</Link>
           <Link to="/about" className={linkClass('/about')}>关于我</Link>
-          <span className="ml-2">{darkToggle}</span>
+          <button onClick={onSearch} className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-all duration-300" title="搜索 (Ctrl+K)">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+          <span className="ml-1">{darkToggle}</span>
         </nav>
 
-        {/* 移动端：汉堡按钮 + 暗色切换 */}
+        {/* 移动端：搜索 + 暗色切换 + 汉堡按钮 */}
         <div className="flex items-center gap-1 md:hidden">
+          <button onClick={onSearch} className="p-2 rounded-lg hover:bg-gray-200/70 dark:hover:bg-gray-700/70 transition-colors" aria-label="搜索">
+            <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
           {darkToggle}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
