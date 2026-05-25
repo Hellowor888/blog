@@ -77,6 +77,17 @@ body::after {
   100% { background-position: 200% 0; }
 }
 
+.animate-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 2s linear infinite;
+}
+
+/* ===== 博客标题字体 ===== */
+.blog-title {
+  font-family: 'Caveat', 'Comic Sans MS', cursive;
+  letter-spacing: 0.02em;
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
 }
