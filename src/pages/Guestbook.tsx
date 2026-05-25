@@ -29,26 +29,47 @@ export default function Guestbook() {
   const pwdRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    const q = query(collection(db, 'guestbook_messages'))
-    const unsub = onSnapshot(q,
-      (snapshot) => {
-        const msgs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Message))
-        msgs.sort((a, b) => {
+    let unsub = () => {}
+
+    async function init() {
+      try {
+        // 先用 getDocs 从服务器拉取数据，避免 onSnapshot 缓存问题
+        const snap = await getDocs(query(collection(db, 'guestbook_messages')))
+        const serverMsgs = snap.docs.map(d => ({ id: d.id, ...d.data() } as Message))
+        serverMsgs.sort((a, b) => {
           const ta = a.createdAt?.toMillis?.() ?? 0
           const tb = b.createdAt?.toMillis?.() ?? 0
           return tb - ta
         })
-        console.log('Firestore 监听返回:', msgs.length, '条留言')
-        setMessages(msgs)
+        console.log('getDocs 从服务器拉取:', serverMsgs.length, '条留言')
+        setMessages(serverMsgs)
         setLoading(false)
-      },
-      (err) => {
-        console.error('Firestore 监听失败:', err)
-        alert('留言加载失败: ' + err.message)
-        setLoading(false)
+      } catch (err: any) {
+        console.error('getDocs 失败:', err)
       }
-    )
-    return unsub
+
+      // 然后开启实时监听
+      const q = query(collection(db, 'guestbook_messages'))
+      unsub = onSnapshot(q,
+        (snapshot) => {
+          const msgs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Message))
+          msgs.sort((a, b) => {
+            const ta = a.createdAt?.toMillis?.() ?? 0
+            const tb = b.createdAt?.toMillis?.() ?? 0
+            return tb - ta
+          })
+          console.log('onSnapshot 更新:', msgs.length, '条留言')
+          setMessages(msgs)
+          setLoading(false)
+        },
+        (err) => {
+          console.error('onSnapshot 失败:', err)
+        }
+      )
+    }
+
+    init()
+    return () => unsub()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {

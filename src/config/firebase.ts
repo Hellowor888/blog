@@ -1,8 +1,6 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore } from 'firebase/firestore'
+import { initializeFirestore, memoryLocalCache } from 'firebase/firestore'
 
-// 替换成你自己的 Firebase 配置 ↓
-// 在 Firebase Console → 项目设置 → 常规 → 你的应用 → 配置 中获取
 const firebaseConfig = {
   apiKey: 'AIzaSyBl5G2FULAIDEIskS4tdmdTwPj6AMLORqI',
   authDomain: 'my-blog-guestbook.firebaseapp.com',
@@ -14,4 +12,4 @@ const firebaseConfig = {
 }
 
 const app = initializeApp(firebaseConfig)
-export const db = getFirestore(app)
+export const db = initializeFirestore(app, { localCache: memoryLocalCache() })
