@@ -117,8 +117,9 @@ export default function Guestbook() {
 
   return (
     <div>
-      <Danmaku messages={danmakuTexts} />
       <h1 className="text-xl md:text-2xl font-bold mb-6 gradient-text">给我留言</h1>
+
+      <Danmaku messages={danmakuTexts} />
 
       {dbStatus !== 'ok' && (
         <div className={`mb-4 p-3 rounded-lg text-sm ${

@@ -43,6 +43,13 @@ export default function Home() {
 
   return (
     <div>
+      {/* Tag filter — at the top of all content */}
+      {tags.length > 0 && (
+        <div className="mb-8">
+          <TagFilter tags={tags} selectedTags={selectedTags} onTagClick={handleTagClick} />
+        </div>
+      )}
+
       {/* 摄影作品 */}
       {collections.length > 0 && (
         <section className="mb-8 md:mb-12">
@@ -94,8 +101,6 @@ export default function Home() {
       {/* 最新文章 */}
       <section>
         <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 gradient-text">最新文章</h2>
-
-        <TagFilter tags={tags} selectedTags={selectedTags} onTagClick={handleTagClick} />
 
         {filteredPosts.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400 text-center py-12">
