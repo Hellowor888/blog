@@ -6,4 +6,5 @@ export interface Post {
   excerpt: string
   content: string
   readingTime: number
+  section: 'blog' | 'tech'
 }

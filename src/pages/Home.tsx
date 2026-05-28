@@ -17,10 +17,23 @@ export default function Home() {
     getAllTags().then(setTags)
   }, [])
 
+  const { techPosts, blogPosts } = useMemo(() => {
+    const tech: Post[] = []
+    const blog: Post[] = []
+    for (const p of posts) {
+      if (p.section === 'tech') {
+        tech.push(p)
+      } else {
+        blog.push(p)
+      }
+    }
+    return { techPosts: tech, blogPosts: blog }
+  }, [posts])
+
   const filteredPosts = useMemo(() => {
-    if (selectedTags.length === 0) return posts
-    return posts.filter((p) => selectedTags.every((t) => p.tags.includes(t)))
-  }, [posts, selectedTags])
+    if (selectedTags.length === 0) return blogPosts
+    return blogPosts.filter((p) => selectedTags.every((t) => p.tags.includes(t)))
+  }, [blogPosts, selectedTags])
 
   const handleTagClick = (tag: string) => {
     setSelectedTags((prev) =>
@@ -56,6 +69,23 @@ export default function Home() {
                   <p className="text-xs text-white/60 mt-2">{col.photos.length} 张照片</p>
                 </div>
               </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 技术分享 */}
+      {techPosts.length > 0 && (
+        <section className="mb-8 md:mb-12">
+          <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 gradient-text">技术分享</h2>
+          <div className="grid gap-6 article-grid">
+            {techPosts.map((post) => (
+              <PostCard
+                key={post.slug}
+                post={post}
+                selectedTags={[]}
+                onTagClick={() => {}}
+              />
             ))}
           </div>
         </section>

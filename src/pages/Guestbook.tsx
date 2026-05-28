@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useIdentity } from '../hooks/useIdentity'
+import Danmaku from '../components/Danmaku'
 
 interface Message {
   _id: string
@@ -102,6 +103,8 @@ export default function Guestbook() {
     }
   }
 
+  const danmakuTexts = useMemo(() => messages.map((m) => m.text), [messages])
+
   const handleDelete = async (id: string) => {
     if (!authed) return
     try {
@@ -114,6 +117,7 @@ export default function Guestbook() {
 
   return (
     <div>
+      <Danmaku messages={danmakuTexts} />
       <h1 className="text-xl md:text-2xl font-bold mb-6 gradient-text">给我留言</h1>
 
       {dbStatus !== 'ok' && (

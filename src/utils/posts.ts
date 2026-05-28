@@ -53,6 +53,7 @@ export async function getAllPosts(): Promise<Post[]> {
       excerpt: (data.excerpt as string) ?? '',
       content,
       readingTime: calcReadingTime(content),
+      section: (data.section as 'blog' | 'tech') ?? 'blog',
     })
   }
 
